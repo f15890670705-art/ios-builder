@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          xcodebuild -project AXTouch.xcodeproj -scheme AXTouch \
+          xcodebuild -project LuaTouch.xcodeproj -scheme LuaTouch \
             -sdk iphoneos -configuration Release -derivedDataPath dd \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= \
             ARCHS=arm64 build > /tmp/xb.log 2>&1 || {
@@ -49,35 +49,35 @@ jobs:
       - name: Package ipa
         run: |
           set -e
-          APP=dd/Build/Products/Release-iphoneos/AXTouch.app
-          test -f "$APP/AXTouch"
+          APP=dd/Build/Products/Release-iphoneos/LuaTouch.app
+          test -f "$APP/LuaTouch"
           mkdir -p Payload
           cp -R "$APP" Payload/
 
           # broadcast extension must really land in PlugIns
-          if [ ! -d Payload/AXTouch.app/PlugIns/AXBroadcast.appex ]; then
-            mkdir -p Payload/AXTouch.app/PlugIns
+          if [ ! -d Payload/LuaTouch.app/PlugIns/AXBroadcast.appex ]; then
+            mkdir -p Payload/LuaTouch.app/PlugIns
             cp -R dd/Build/Products/Release-iphoneos/AXBroadcast.appex \
-              Payload/AXTouch.app/PlugIns/ || true
+              Payload/LuaTouch.app/PlugIns/ || true
           fi
-          test -d Payload/AXTouch.app/PlugIns/AXBroadcast.appex || {
+          test -d Payload/LuaTouch.app/PlugIns/AXBroadcast.appex || {
             echo "===== missing broadcast extension ====="
             find dd/Build/Products/Release-iphoneos -maxdepth 2 -name "*.appex" | head -30
             exit 1
           }
 
           echo "--- PlugIns ---"
-          ls -l Payload/AXTouch.app/PlugIns
+          ls -l Payload/LuaTouch.app/PlugIns
           echo "--- app content ---"
-          ls Payload/AXTouch.app
-          du -sh Payload/AXTouch.app
+          ls Payload/LuaTouch.app
+          du -sh Payload/LuaTouch.app
 
           VER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" \
-            Payload/AXTouch.app/Info.plist)
+            Payload/LuaTouch.app/Info.plist)
           BID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" \
-            Payload/AXTouch.app/Info.plist)
+            Payload/LuaTouch.app/Info.plist)
           echo "version=$VER bundle=$BID"
-          zip -qry "AXTouch-${VER}.ipa" Payload
+          zip -qry "LuaTouch-${VER}.ipa" Payload
 
       - uses: actions/upload-artifact@v4
         with:
